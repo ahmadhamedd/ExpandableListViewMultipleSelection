@@ -21,16 +21,17 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends ActionBarActivity {
+public class ArrayExample extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         //VIEWS
         setContentView(R.layout.activity_main);
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.list_view);
         final TextView textView = (TextView) findViewById(R.id.textView);
-        textView.setText("THIS IS MainActivity ACTIVITY");
+        textView.setText("THIS IS ArrayExample ACTIVITY");
         //DATA
         final List<String> schools = Arrays.asList("School 1", "School 2");
         final Map<String, List<String>> students = new HashMap<>();
@@ -56,7 +57,7 @@ public class MainActivity extends ActionBarActivity {
     private class MyAdapter<G, C> extends BaseExpandableListAdapter {
         private List<G> groups;
         private Map<G, List<C>> childMap;
-        private Map<G, List<C>> selectedItems;
+        private List<C> selectedItems;
 
         public MyAdapter(List<G> groups, Map<G, List<C>> childMap){
 
@@ -64,36 +65,23 @@ public class MainActivity extends ActionBarActivity {
             this.childMap = childMap;
 
             //init selected Items Array
-            this.selectedItems = new HashMap<>();
+            this.selectedItems = new ArrayList<>();
 
         }
 
-        public Map<G, List<C>> getSelectedItems() {
+        public List<C> getSelectedItems() {
             return selectedItems;
         }
 
         public boolean isSelected(int groupPosition, int childPosition){
-            G group = groups.get(groupPosition);
             C child = getChild(groupPosition,childPosition);
-            List<C> sel = selectedItems.get(group);
-            return sel != null && sel.contains(child);
+            return selectedItems.contains(child);
         }
 
         public void toggleSelection(int groupPosition, int childPosition){
-            G group = groups.get(groupPosition);
             C child = getChild(groupPosition,childPosition);
-
-            List<C> sel = selectedItems.get(group);
-            if (sel == null){
-                sel = new ArrayList<>();
-                selectedItems.put(group, sel);
-            }
-
-            if (sel.contains(child))
-                sel.remove(child);
-            else
-                sel.add(child);
-
+            if (selectedItems.contains(child)) selectedItems.remove(child);
+            else selectedItems.add(child);
         }
 
         @Override
@@ -105,8 +93,7 @@ public class MainActivity extends ActionBarActivity {
         public int getChildrenCount(int groupPosition) {
             G group = getGroup(groupPosition);
             List<C> childList = childMap.get(group);
-            int childCount = childList == null ? 0:childList.size();
-            return childCount;
+            return childList == null ? 0:childList.size();
         }
 
         @Override
@@ -140,7 +127,7 @@ public class MainActivity extends ActionBarActivity {
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
             TextView node = (TextView) convertView;
             if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater)MainActivity.this.getSystemService
+                LayoutInflater inflater = (LayoutInflater)ArrayExample.this.getSystemService
                         (Context.LAYOUT_INFLATER_SERVICE);
                 node = (TextView) inflater.inflate(R.layout.list_item, null);
             }
@@ -154,7 +141,7 @@ public class MainActivity extends ActionBarActivity {
         public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
             TextView node = (TextView) convertView;
             if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater)MainActivity.this.getSystemService
+                LayoutInflater inflater = (LayoutInflater)ArrayExample.this.getSystemService
                         (Context.LAYOUT_INFLATER_SERVICE);
                 node = (TextView) inflater.inflate(R.layout.list_item, null);
             }
@@ -175,25 +162,14 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private String prettyPrintSelected(MyAdapter adapter) {
-        Map<String, List<String>> selectedItems =  adapter.getSelectedItems();
+        List<String> selectedItems =  adapter.getSelectedItems();
         String result = "  \nSelected Items in list: \n";
-        for(String school: selectedItems.keySet()){
-            List<String> students = selectedItems.get(school);
-            if (students.size() > 0){
-                result+="\n" + school + ": ";
-                for (String student: students){
-                    result += student +", ";
-                }
-            }
-        }
+
+        for(String student: selectedItems)
+            result+= student +", ";
 
         Log.e("Selected Items", result);
         return result;
     }
-    private ArrayList<String> selectedAsList(Map<String, List<String>> selectedItems){
-         ArrayList<String> result =  new ArrayList<>();
-        for(List<String> students: selectedItems.values())
-            result.addAll(students);
-        return result;
-    }
+
 }
